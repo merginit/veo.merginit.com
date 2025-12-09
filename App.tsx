@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Video,
   Sparkles,
@@ -18,15 +18,17 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { generateVeoVideo } from './services/veoService';
 import { setCredentials } from './services/authService';
 import { AspectRatio, Resolution, VeoModel, VideoGenerationState, ServiceAccount } from './types';
+import { loadSettings, saveSettings } from './services/settingsService';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const [prompt, setPrompt] = useState('');
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(AspectRatio.Landscape);
-  const [resolution, setResolution] = useState<Resolution>(Resolution.HD);
-  const [model, setModel] = useState<VeoModel>(VeoModel.Fast);
+  const initialSettings = useMemo(() => (typeof window !== 'undefined' ? loadSettings() : null), []);
+  const [prompt, setPrompt] = useState(initialSettings?.prompt ?? '');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(initialSettings?.aspectRatio ?? AspectRatio.Landscape);
+  const [resolution, setResolution] = useState<Resolution>(initialSettings?.resolution ?? Resolution.HD);
+  const [model, setModel] = useState<VeoModel>(initialSettings?.model ?? VeoModel.Fast);
 
   const [status, setStatus] = useState<VideoGenerationState>({
     isGenerating: false,
@@ -34,6 +36,11 @@ const App: React.FC = () => {
     videoUri: null,
     error: null
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    saveSettings({ prompt, aspectRatio, resolution, model });
+  }, [prompt, aspectRatio, resolution, model]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
