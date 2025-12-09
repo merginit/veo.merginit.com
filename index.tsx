@@ -13,3 +13,7 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+if (typeof window !== 'undefined') {
+  import('./pwa');
+}
