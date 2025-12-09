@@ -1,5 +1,11 @@
 # Veo Video Studio
 
+![Preview](assets/preview.png)
+
+<video src="assets/Crystal_Slime_Cube_Impact.mp4" controls muted playsinlinewidth="480"></video>
+<video src="assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4" controls muted playsinlinewidth="480"></video>
+<video src="assets/Slime_and_Honeycomb_Crunch_Video.mp4" controls muted playsinlinewidth="480"></video>
+
 ## Run Locally
 
 1. Install dependencies:
