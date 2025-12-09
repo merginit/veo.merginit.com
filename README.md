@@ -2,9 +2,9 @@
 
 ![Preview](assets/preview.png)
 
-[assets/Crystal_Slime_Cube_Impact.mp4](assets/Crystal_Slime_Cube_Impact.mp4)
-[assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4](assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4)
-[assets/Slime_and_Honeycomb_Crunch_Video.mp4](assets/Slime_and_Honeycomb_Crunch_Video.mp4)
+[<video src="assets/Crystal_Slime_Cube_Impact.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Crystal_Slime_Cube_Impact.mp4)
+[<video src="assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4)
+[<video src="assets/Slime_and_Honeycomb_Crunch_Video.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Slime_and_Honeycomb_Crunch_Video.mp4)
 
 ## Run Locally
 
