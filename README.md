@@ -2,9 +2,17 @@
 
 ![Preview](assets/preview.png)
 
-[<video src="assets/Crystal_Slime_Cube_Impact.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Crystal_Slime_Cube_Impact.mp4)
-[<video src="assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4)
-[<video src="assets/Slime_and_Honeycomb_Crunch_Video.mp4" controls muted playsinline width="480" poster="assets/preview.png"></video>](assets/Slime_and_Honeycomb_Crunch_Video.mp4)
+https://github.com/user-attachments/assets/b2a063e6-5751-458b-822e-53f125f9b0a7
+
+https://github.com/merginit/veo-video-studio/raw/refs/heads/main/assets/Crystal_Slime_Cube_Impact.mp4
+
+https://github.com/user-attachments/assets/d5eaaf76-b5b4-4e60-9c4e-ab1904b7ea5a
+
+https://github.com/merginit/veo-video-studio/raw/refs/heads/main/assets/Slime_and_Honeycomb_Crunch_Video.mp4
+
+https://github.com/user-attachments/assets/9bde373d-fec1-4ee6-bda5-7b43ff480716
+
+https://github.com/merginit/veo-video-studio/raw/refs/heads/main/assets/Deep_Space_Pearl_Swirl_Video_Generation.mp4
 
 ## Run Locally
 
