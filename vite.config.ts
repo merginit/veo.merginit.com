@@ -15,6 +15,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         injectRegister: null,
         devOptions: { enabled: true, type: 'module' },
+        includeAssets: ['favicon.svg'],
         manifest: {
           name: 'Veo Video Studio',
           short_name: 'Veo Studio',
@@ -30,6 +31,12 @@ export default defineConfig(() => {
         }
       })
     ],
+    build: {
+      modulePreload: {
+        // Avoid modulepreload polyfill that can throw when DOM isn't available
+        polyfill: false
+      }
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
