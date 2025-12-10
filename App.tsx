@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import { Button } from './components/Button';
 import { PromptGeneratorModal } from './components/prompt/PromptGeneratorModal';
+import { PromptHistoryModal } from './components/history/PromptHistoryModal';
 import { VideoPlayer } from './components/VideoPlayer';
 import { generateVeoVideo } from './services/veoService';
+import { addPromptHistory, buildHistoryEntry } from './services/promptHistoryService';
 import { setCredentials } from './services/authService';
 import { AspectRatio, Resolution, VeoModel, VideoGenerationState, ServiceAccount } from './types';
 import { loadSettings, saveSettings } from './services/settingsService';
@@ -29,6 +31,7 @@ const App: React.FC = () => {
   const initialSettings = useMemo(() => (typeof window !== 'undefined' ? loadSettings() : null), []);
   const [prompt, setPrompt] = useState(initialSettings?.prompt ?? '');
   const [showGenerator, setShowGenerator] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(initialSettings?.aspectRatio ?? AspectRatio.Landscape);
   const [resolution, setResolution] = useState<Resolution>(initialSettings?.resolution ?? Resolution.HD);
   const [model, setModel] = useState<VeoModel>(initialSettings?.model ?? VeoModel.Fast);
@@ -75,7 +78,7 @@ const App: React.FC = () => {
     });
 
     try {
-      const uri = await generateVeoVideo({
+      const result = await generateVeoVideo({
         prompt,
         aspectRatio,
         resolution,
@@ -87,9 +90,18 @@ const App: React.FC = () => {
       setStatus(prev => ({
         ...prev,
         isGenerating: false,
-        videoUri: uri,
+        videoUri: result.uri,
         progressMessage: ''
       }));
+      await addPromptHistory(buildHistoryEntry({
+        prompt,
+        aspectRatio,
+        resolution,
+        model,
+        videoUri: result.uri,
+        videoBlob: result.blob ?? null,
+        error: null
+      }))
     } catch (err: any) {
       console.error(err);
       setStatus(prev => ({
@@ -98,8 +110,42 @@ const App: React.FC = () => {
         error: err.message || 'Generation failed',
         progressMessage: ''
       }));
+      await addPromptHistory(buildHistoryEntry({
+        prompt,
+        aspectRatio,
+        resolution,
+        model,
+        videoUri: null,
+        error: err?.message ? String(err.message) : 'Generation failed'
+      }))
     }
   };
+
+  const handleReplay = async (entry: { prompt: string; aspectRatio: AspectRatio; resolution: Resolution; model: VeoModel }) => {
+    setPrompt(entry.prompt)
+    setAspectRatio(entry.aspectRatio)
+    setResolution(entry.resolution)
+    setModel(entry.model)
+    await handleGenerate()
+  }
+
+  const handlePersistCurrent = async () => {
+    if (!status.videoUri) return
+    try {
+      const res = await fetch(status.videoUri)
+      if (!res.ok) return
+      const blob = await res.blob()
+      await addPromptHistory(buildHistoryEntry({
+        prompt,
+        aspectRatio,
+        resolution,
+        model,
+        videoUri: status.videoUri,
+        videoBlob: blob,
+        error: null
+      }))
+    } catch {}
+  }
 
   if (!isAuthenticated) {
     return (
@@ -169,6 +215,12 @@ const App: React.FC = () => {
               Vertex AI
             </div>
             <InstallPrompt />
+            <button
+              onClick={() => setShowHistory(true)}
+              className="text-xs text-zinc-600 hover:text-white transition-colors font-mono uppercase"
+            >
+              History
+            </button>
             <button
               onClick={() => setIsAuthenticated(false)}
               className="text-xs text-zinc-600 hover:text-white transition-colors font-mono uppercase"
@@ -372,6 +424,13 @@ const App: React.FC = () => {
         open={showGenerator}
         onClose={() => setShowGenerator(false)}
         onInsert={(text) => setPrompt(text)}
+      />
+      <PromptHistoryModal
+        open={showHistory}
+        onClose={() => setShowHistory(false)}
+        onInsert={(text) => { setPrompt(text); setShowHistory(false) }}
+        onReplay={(e) => handleReplay({ prompt: e.prompt, aspectRatio: e.aspectRatio, resolution: e.resolution, model: e.model })}
+        onPersistCurrent={handlePersistCurrent}
       />
     </div>
   );

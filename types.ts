@@ -42,3 +42,20 @@ export interface ServiceAccount {
   client_x509_cert_url: string;
   universe_domain?: string;
 }
+
+export interface PromptHistoryEntry {
+  id: number;
+  prompt: string;
+  aspectRatio: AspectRatio;
+  resolution: Resolution;
+  model: VeoModel;
+  videoUri: string | null;
+  videoBlob?: Blob | null;
+  error: string | null;
+  createdAt: number;
+}
+
+export interface GenerationResult {
+  uri: string;
+  blob?: Blob | null;
+}

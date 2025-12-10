@@ -1,4 +1,4 @@
-import { GenerationParams, VeoModel, Resolution } from "../types";
+import { GenerationParams, VeoModel, Resolution, GenerationResult } from "../types";
 import { getAccessToken, getProjectId } from "./authService";
 
 const LOCATION = "us-central1";
@@ -6,7 +6,7 @@ const LOCATION = "us-central1";
 export const generateVeoVideo = async (
   params: GenerationParams,
   onProgress: (msg: string) => void
-): Promise<string> => {
+): Promise<GenerationResult> => {
   const { model } = params;
 
   onProgress("Authenticating with Vertex AI...");
@@ -141,16 +141,25 @@ export const generateVeoVideo = async (
     return null;
   }
 
-  async function maybeDownload(videoUri: string, accessToken: string, onProgress: (msg: string) => void): Promise<string> {
+  async function maybeDownload(videoUri: string, accessToken: string, onProgress: (msg: string) => void): Promise<GenerationResult> {
     if (videoUri.startsWith("gs://")) {
       onProgress("Retrieving video from Cloud Storage...");
-      return await downloadGcsVideo(videoUri, accessToken);
+      const blob = await downloadGcsVideo(videoUri, accessToken);
+      return { uri: URL.createObjectURL(blob), blob };
     }
-    return videoUri;
+    // For data: URIs or http(s) URIs, try to fetch a Blob for durability when possible
+    try {
+      const res = await fetch(videoUri);
+      if (res.ok) {
+        const blob = await res.blob();
+        return { uri: videoUri, blob };
+      }
+    } catch {}
+    return { uri: videoUri, blob: null };
   }
 };
 
-async function downloadGcsVideo(gcsUri: string, accessToken: string): Promise<string> {
+async function downloadGcsVideo(gcsUri: string, accessToken: string): Promise<Blob> {
   const matches = gcsUri.match(/gs:\/\/([^/]+)\/(.+)/);
   if (!matches) {
     throw new Error("Invalid GCS URI format");
@@ -172,7 +181,7 @@ async function downloadGcsVideo(gcsUri: string, accessToken: string): Promise<st
   }
 
   const blob = await response.blob();
-  return URL.createObjectURL(blob);
+  return blob;
 }
 
 const limiterState: Map<string, { windowStart: number; used: number }> = new Map();
