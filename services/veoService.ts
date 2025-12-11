@@ -28,6 +28,19 @@ export const generateVeoVideo = async (
       }
       onProgress("Waiting for generation...");
       const final = await waitForOperation(projectId, candidate, opName, accessToken);
+      const raiReasons =
+        final?.response?.raiMediaFilteredReasons ||
+        final?.response?.raiFilteredReasons;
+      const raiCount =
+        final?.response?.raiMediaFilteredCount ||
+        final?.response?.raiFilteredCount ||
+        (Array.isArray(raiReasons) ? raiReasons.length : 0);
+      if (raiCount && raiCount > 0) {
+        const reasonText = Array.isArray(raiReasons) && raiReasons.length
+          ? raiReasons.join(" | ")
+          : "Generation blocked by safety filters.";
+        throw new Error(`Vertex AI safety filters blocked the video: ${reasonText}`);
+      }
       const videoUri = extractVideoUriFromOperation(final);
       if (videoUri) return await maybeDownload(videoUri, accessToken, onProgress);
       throw new Error("Kein Video-URI in der Operation gefunden.");
@@ -124,6 +137,16 @@ export const generateVeoVideo = async (
         throw new Error(`Vertex AI Error (${response.status}): ${errorText}`);
       }
       const json = await response.json();
+      const opError = json.error || json.response?.error;
+      const partialError = json.response?.partialErrors?.[0];
+      if (opError) {
+        const message = opError.message || JSON.stringify(opError);
+        throw new Error(`Vertex operation failed: ${message}`);
+      }
+      if (partialError) {
+        const message = partialError.message || JSON.stringify(partialError);
+        throw new Error(`Vertex operation partial failure: ${message}`);
+      }
       if (json.done) return json;
       attempts++;
       await new Promise(r => setTimeout(r, Math.min(2000 + attempts * 250, 5000)));
@@ -131,13 +154,39 @@ export const generateVeoVideo = async (
   }
 
   function extractVideoUriFromOperation(op: any): string | null {
-    if (!op.response || !op.response.videos) return null;
-    const videos = op.response.videos as Array<{ gcsUri?: string; mimeType?: string; bytesBase64Encoded?: string }>;
-    const first = videos[0];
-    if (!first) return null;
-    if (first.gcsUri) return first.gcsUri;
-    const bytes = (first as any).bytesBase64Encoded;
-    if (bytes) return `data:video/mp4;base64,${bytes}`;
+    if (!op.response) return null;
+    const response = op.response;
+
+    const videoUriFromVideos = (() => {
+      if (!response.videos) return null;
+      const videos = response.videos as Array<{ gcsUri?: string; uri?: string; outputUri?: string; bytesBase64Encoded?: string }>;
+      const first = videos[0];
+      if (!first) return null;
+      if (first.gcsUri) return first.gcsUri;
+      if ((first as any).uri) return (first as any).uri;
+      if ((first as any).outputUri) return (first as any).outputUri;
+      const bytes = (first as any).bytesBase64Encoded || (first as any).bytes_base64_encoded;
+      if (bytes) return `data:video/mp4;base64,${bytes}`;
+      return null;
+    })();
+    if (videoUriFromVideos) return videoUriFromVideos;
+
+    const prediction = Array.isArray(response.predictions) ? response.predictions[0] : null;
+    if (response.outputUri || response.output_uri) return response.outputUri ?? response.output_uri;
+    if (prediction) {
+      const directUri =
+        prediction.gcsUri ||
+        prediction.outputUri ||
+        prediction.output_uri ||
+        prediction.uri;
+      if (directUri) return directUri;
+      const bytes = prediction.bytesBase64Encoded || prediction.bytes_base64_encoded;
+      if (bytes) return `data:video/mp4;base64,${bytes}`;
+    }
+
+    const responseBytes = response.bytesBase64Encoded || response.bytes_base64_encoded;
+    if (responseBytes) return `data:video/mp4;base64,${responseBytes}`;
+
     return null;
   }
 
