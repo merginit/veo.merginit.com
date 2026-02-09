@@ -1,6 +1,22 @@
 # Veo Video Studio
 
+<div align="center">
+    <img src="./public/logo.png" alt="icon" width="150" />
+</div>
+
+<div align="center" style="margin-bottom: 2.5rem;">
+    <span style="font-size: 2.5rem;">
+      <b><strong style="font-size: 5rem;">Veo Video Studio</strong></b>
+      <br>"Veo Video Studio: A FREE, good-looking UI for using Veo 3 without having to navigate Google Cloud Console."
+    </span>
+</div>
+
+<br>
+
 ![Preview](assets/preview.png)
+
+Veo Video Studio persists prompts and results locally in your browser and has an integrated prompt builder.  
+Everything is done locally, and your credentials aren't stored anywhere!
 
 https://github.com/user-attachments/assets/b2a063e6-5751-458b-822e-53f125f9b0a7
 
