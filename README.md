@@ -7,7 +7,7 @@
 <div align="center" style="margin-bottom: 2.5rem;">
     <span style="font-size: 2.5rem;">
       <b><strong style="font-size: 5rem;">Veo Video Studio</strong></b>
-      <br>"Veo Video Studio: A FREE, good-looking UI for using Veo 3 without having to navigate Google Cloud Console."
+      <br>"Veo Video Studio: A FREE,<br>good-looking UI for using Veo 3<br>without having to navigate Google Cloud Console."
     </span>
 </div>
 
